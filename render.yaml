@@ -1,0 +1,31 @@
+# Blueprint do Render (Infrastructure as Code).
+# No painel: New + → Blueprint → selecione o repositório. O Render cria o banco e o serviço web
+# automaticamente com as configurações abaixo. Também é possível criar manualmente (ver README).
+services:
+  - type: web
+    name: pluviometria-campo-bom
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pluviometria-db
+          property: connectionString
+      - key: DATABASE_SSL
+        value: "true"
+
+databases:
+  - name: pluviometria-db
+    plan: free
+    region: oregon
+    databaseName: pluviometria
+    user: pluviometria
